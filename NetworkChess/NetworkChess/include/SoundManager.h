@@ -24,4 +24,6 @@ private:
 
 	FMOD_SYSTEM* mSys;
 };
+static SoundManager& SOUNDMANAGER = SoundManager::Instance();
+
 #endif

@@ -1,14 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <WinSock2.h>
 
 #include "DrawManager.h"
 #include "SoundManager.h"
+#include "MessageManager.h"
+#include "GameManager.h"
 
-static DrawManager& DRAWMANAGER = DrawManager::Instance();
-static SoundManager& SOUNDMANAGER = SoundManager::Instance();
 
-void pause();
-void drawTexture(SDL_Window* pWindow, std::string path, float x, float y, float h, float w);
+void drawBackGroundMenuPrincipal();
+void drawInteractiveMenuPrincipal();
+void drawLevel();
+void drawDamier(int w, int h, int nbBoxX, int nbBoxY, int offsetX, int offsetY);
+void principalLoop();
+void menuLoop();
+void gameLoop();
+
 int main(int argc, char** argv)
 {
     if (SDL_Init(SDL_INIT_VIDEO) == -1)
@@ -16,21 +24,48 @@ int main(int argc, char** argv)
 		fprintf(stdout, "Échec de l'initialisation de la SDL (%s)\n", SDL_GetError());
 		return -1;
     }
-	
+	if (TTF_Init() == -1)
+	{
+		fprintf(stderr, "Erreur d'initialisation de TTF_Init : %s\n", TTF_GetError());
+		exit(EXIT_FAILURE);
+	}
+	int imgFlags = IMG_INIT_PNG;
+	if (!(IMG_Init(imgFlags) & imgFlags))
+	{
+		fprintf(stdout,"SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
+	}
 	/* Création de la fenêtre */
 	
-	DRAWMANAGER.initWindow("Chess", 680, 480);
+	DRAWMANAGER.initWindow("Chess", WINDOW_WIDTH, WINDOW_HEIGHT);
 	DRAWMANAGER.initRenderer();
 	SOUNDMANAGER.initFMOD();
-
+	
 	if (DRAWMANAGER.getWindow())
 	{
-		DRAWMANAGER.addImage("WallPaperPrincipal", "src/img/Capture.bmp");
-		DRAWMANAGER.drawTexture("WallPaperPrincipal", 0, 0);
-		DRAWMANAGER.render();
-		pause();
+		DRAWMANAGER.addImage("WallPaperPrincipal", "src/img/chessWallPaper.bmp");
+		//DRAWMANAGER.addImage("EchecDamier", "src/img/EchecDamier.bmp");
+		DRAWMANAGER.addImage("InputField", "src/img/inputField.bmp");
+
+		DRAWMANAGER.addImage("PawnWhite", "src/img/PawnWhite.png");
+		DRAWMANAGER.addImage("RookWhite", "src/img/RookWhite.png");
+		DRAWMANAGER.addImage("KnightWhite", "src/img/KnightWhite.png");
+		DRAWMANAGER.addImage("BishopWhite", "src/img/BishopWhite.png");
+		DRAWMANAGER.addImage("QueenWhite", "src/img/QueenWhite.png");
+		DRAWMANAGER.addImage("KingWhite", "src/img/KingWhite.png");
+
+		DRAWMANAGER.addImage("PawnBlack", "src/img/PawnBlack.png");
+		DRAWMANAGER.addImage("RookBlack", "src/img/RookBlack.png");
+		DRAWMANAGER.addImage("KnightBlack", "src/img/KnightBlack.png");
+		DRAWMANAGER.addImage("BishopBlack", "src/img/BishopBlack.png");
+		DRAWMANAGER.addImage("QueenBlack", "src/img/QueenBlack.png");
+		DRAWMANAGER.addImage("KingBlack", "src/img/KingBlack.png");
+
+		DRAWMANAGER.addText("ClientButton", "Client v1.0", TTF_OpenFont("src/fonts/arial.ttf", 72), { 0, 0, 0 });
+		DRAWMANAGER.addText("Connexion", "Connexion", TTF_OpenFont("src/fonts/arial.ttf", 72), { 0, 0, 0 });
+		principalLoop();
+
 		SDL_DestroyWindow(DRAWMANAGER.getWindow());
-		//DRAWMANAGER.freeImages();
+		DRAWMANAGER.freeImages();
 		DRAWMANAGER.freeRenderer();
 		SOUNDMANAGER.freeFMOD();
 	}
@@ -38,24 +73,183 @@ int main(int argc, char** argv)
 	{
 		fprintf(stderr, "Erreur de création de la fenêtre: %s\n", SDL_GetError());
 	}
-
+	MESSAGEMANAGER.close();
+	TTF_Quit();
     SDL_Quit();
 
     return EXIT_SUCCESS;
 }
-void pause()
+void drawBackGroundMenuPrincipal()
 {
-	int continuer = 1;
-	SDL_Event event;
+	//Dessin du menu principal
+	int windowsW = SDL_GetWindowSurface(DRAWMANAGER.getWindow())->w;
+	int windowsH = SDL_GetWindowSurface(DRAWMANAGER.getWindow())->h;
+	DRAWMANAGER.drawTexture("WallPaperPrincipal", 0, 0, windowsW, windowsH);
+	DRAWMANAGER.drawTexture("ClientButton", (windowsW / 5) - (DRAWMANAGER.getSurface("ClientButton")->w)/2, windowsH * 90/100, 100, 25);
+	DRAWMANAGER.drawTexture("PseudoFieldPos", "InputField", (windowsW / 2) - 100, (windowsH / 9) * 5 - 25, 200, 50);
+	DRAWMANAGER.drawTexture("IpFieldPos", "InputField", (windowsW / 2) - 100, DRAWMANAGER.getRect("PseudoFieldPos")->y + 60, 200, 50);
+	DRAWMANAGER.drawTexture("PortFieldPos", "InputField", (windowsW / 2) - 100, DRAWMANAGER.getRect("IpFieldPos")->y + 60, 200, 50);
+	DRAWMANAGER.drawTexture("ConnexionPos", "Connexion", (windowsW * 80 / 100) - 100, DRAWMANAGER.getRect("PseudoFieldPos")->y + 60, 200, 50);
+}
+void drawLevel()
+{
+	//Draw du Level
+	int windowsW = SDL_GetWindowSurface(DRAWMANAGER.getWindow())->w;
+	int windowsH = SDL_GetWindowSurface(DRAWMANAGER.getWindow())->h;
 
-	while (continuer)
+	//DrawDamier
+	drawDamier(windowsH / 10, windowsH / 10, 7, 7, windowsW / 2 - (windowsH * 80 / 100) / 2, windowsH / 2 - (windowsH * 80 / 100) / 2);
+	//SDL_Surface* pSprite = DRAWMANAGER.getSurface("EchecDamier");
+	//DRAWMANAGER.drawTexture("EchecDamier", windowsW / 2 - (windowsH * 80 / 100) / 2, windowsH / 2 - (windowsH * 80 / 100) / 2, (windowsH * 80 / 100), (windowsH * 80 / 100));
+}
+void drawDamier(int w, int h, int nbBoxX, int nbBoxY, int offsetX, int offsetY)
+{
+	for (int i = 0; i <= nbBoxY; i++)
 	{
-		SDL_WaitEvent(&event);
-		switch (event.type)
+		for (int j = 0; j <= nbBoxX; j++)
 		{
-		case SDL_QUIT:
-			continuer = 0;
+			SDL_Rect rec = { (j * w) + offsetX, (i * h) + offsetY, w, h };
+			if ((i+j) == 0 || (i + j) % 2 == 0)
+			{
+				DRAWMANAGER.drawRect(rec, { 0, 0, 0 });
+			}
+			else
+			{
+				DRAWMANAGER.drawRect(rec, { 255, 255, 255 });
+			}
 		}
 	}
+}
+void principalLoop()
+{
+	menuLoop();
+	gameLoop();
+}
+void menuLoop()
+{
+	
+	drawBackGroundMenuPrincipal();
+	DRAWMANAGER.render();
+
+	string pseudoText;
+	string ipText;
+	string portText;
+	string textureNameClicked = "";
+	int continuer = 1;
+	SDL_Event event;
+	string surfaceNameClicked;
+	SDL_Rect mousePosition;
+	bool isconnected = false;
+	while (continuer && (!GAMEMANAGER.isStart()))
+	{
+		while (SDL_PollEvent(&event)) // Nous traitons les événements de la queue
+		{
+			switch (event.type)
+			{
+				case SDL_MOUSEBUTTONUP:
+					mousePosition = { event.button.x, event.button.y, 1, 1 };
+					surfaceNameClicked = DRAWMANAGER.getNameTextureClicked(mousePosition);
+					if (surfaceNameClicked == "ConnexionPos" && !isconnected)
+					{
+						
+						if (pseudoText.size() == 0 || ipText.size() == 0 || portText.size() == 0)
+							break;
+
+						cout << "Run Client" << endl;
+						MESSAGEMANAGER.connect(pseudoText, ipText, stoi(portText));
+						
+						if (MESSAGEMANAGER.isConnected())
+						{
+
+							cout << "Connected" << endl;
+							isconnected = MESSAGEMANAGER.isConnected();
+						}
+						else
+						{
+							cout << "Probleme Connexion" << endl;
+						}
+							
+					}
+					
+					/*fprintf(stdout, "Un appuie sur un bouton de la souris :\n");
+					fprintf(stdout, "\tfenêtre : %d\n", event.button.windowID);
+					fprintf(stdout, "\tsouris : %d\n", event.button.which);
+					fprintf(stdout, "\tbouton : %d\n", event.button.button);
+					#if SDL_VERSION_ATLEAST(2,0,2)
+					fprintf(stdout, "\tclics : %d\n", event.button.clicks);
+					#endif
+					fprintf(stdout, "\tposition : %d;%d\n", event.button.x, event.button.y);*/
+					break;
+					
+				case SDL_KEYUP:
+					if (event.key.keysym.scancode == 42)
+					{
+						if (surfaceNameClicked == "PseudoFieldPos" && pseudoText.size() != 0)
+						{
+							pseudoText.pop_back();
+							DRAWMANAGER.drawInputText(pseudoText, "InputField", "PseudoFieldPos", TTF_OpenFont("src/fonts/arial.ttf", 24), { 0, 0, 0 });
+						}
+						else if (surfaceNameClicked == "IpFieldPos" && ipText.size() != 0)
+						{
+							ipText.pop_back();
+							DRAWMANAGER.drawInputText(ipText, "InputField", "IpFieldPos", TTF_OpenFont("src/fonts/arial.ttf", 24), { 0, 0, 0 });
+						}
+						else if (surfaceNameClicked == "PortFieldPos" && portText.size() != 0)
+						{
+							portText.pop_back();
+							DRAWMANAGER.drawInputText(portText, "InputField", "PortFieldPos", TTF_OpenFont("src/fonts/arial.ttf", 24), { 0, 0, 0 });
+						}
+						DRAWMANAGER.render();
+					}
+					break;
+				case SDL_TEXTINPUT:
+					/* Add new text onto the end of our text */
+					if (surfaceNameClicked == "PseudoFieldPos")
+					{
+						pseudoText += event.text.text;
+						DRAWMANAGER.drawInputText(pseudoText, "InputField", "PseudoFieldPos", TTF_OpenFont("src/fonts/arial.ttf", 24), { 0, 0, 0 });
+					}
+					else if (surfaceNameClicked == "IpFieldPos")
+					{
+						ipText += event.text.text;
+						DRAWMANAGER.drawInputText(ipText, "InputField", "IpFieldPos", TTF_OpenFont("src/fonts/arial.ttf", 24), { 0, 0, 0 });
+					}
+					else if (surfaceNameClicked == "PortFieldPos")
+					{
+						portText += event.text.text;
+						DRAWMANAGER.drawInputText(portText, "InputField", "PortFieldPos", TTF_OpenFont("src/fonts/arial.ttf", 24), { 0, 0, 0 });
+					}
+					DRAWMANAGER.render();
+					break;
+				case SDL_QUIT:
+					continuer = 0;
+			}
+		}
+		
+	}
+}
+
+void gameLoop()
+{
+	int windowsW = SDL_GetWindowSurface(DRAWMANAGER.getWindow())->w;
+	int windowsH = SDL_GetWindowSurface(DRAWMANAGER.getWindow())->h;
+	DRAWMANAGER.clear();
+	drawLevel();
+	GAMEMANAGER.displayPieces();
+	DRAWMANAGER.render();
+	int continuer = 1;
+	SDL_Event event;
+	while (continuer && MESSAGEMANAGER.isConnected())
+	{
+		while (SDL_PollEvent(&event)) // Nous traitons les événements de la queue
+		{
+			switch (event.type)
+			{
+			case SDL_QUIT:
+				continuer = 0;
+				MESSAGEMANAGER.close();
+			}
+		}
+	} 
 }
 
