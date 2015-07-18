@@ -7,86 +7,10 @@ ChatRoom::ChatRoom()
 
 void ChatRoom::processMessage(const Message& message)
 {
-    if (message.data.substr(0, 9) == "/initName")
-    {
-        std::string clientName(message.data);
-        clientName.replace(0, 9, "");
-
-        (*message.sender)->setName(clientName);
-    }
-    else if (message.data.substr(0, 2) == "/w")
-    {
-        std::string buf(message.data);
-        buf.replace(0, 3, "");
-        
-        std::string::size_type separatorIndex = buf.find(" ");
-        
-        if (separatorIndex == buf.npos)
-        {
-            sendMessage(Message("Error commande wisp", message.sender, message.sender));
-        }
-        else
-        {
-            std::string destName = buf.substr(0, separatorIndex);
-            std::string destData = buf.substr(separatorIndex + 1);
-
-            VecUser::iterator dest = userByName(destName);
-
-            std::string wisp = "<";
-            wisp += (*message.sender)->getName();
-            wisp += ">";
-            wisp += destData;
-
-            if (dest != m_clients.end())
-                sendMessage(Message(wisp, message.sender, dest));
-            else
-            {
-                sendMessage(Message(std::string("user : ") + destName + std::string(" not found"), message.sender, message.sender));
-            }
-        }
-    }
-    else if (message.data.substr(0, 5) == "/list")
-    {
-        std::string messageList("User list :\n");
-
-        for (auto it = m_clients.begin(); it != m_clients.end(); ++it)
-        {
-            messageList += (*it)->getName() + "\n";
-        }
-
-        messageList += "\n";
-
-        sendMessage(Message(messageList, message.sender, message.sender));
-    }
-    else if (message.data.substr(0, 5) == "/name")
-    {
-        std::string clientName(message.data);
-        clientName.replace(0, 6, "");
-
-        if (userHasAlreadyName(clientName))
-        {
-            sendMessage(Message("Name already exist !", message.sender, message.sender));
-        }
-        else
-        {
-            std::string nameChangeMessage((*message.sender)->getName());
-            nameChangeMessage += " change name to ";
-            nameChangeMessage += clientName;
-
-            (*message.sender)->setName(clientName);
-
-            dispatchMessage(Message(nameChangeMessage, message.sender));
-        }
-    }
-    else if (message.data.substr(0, 5) == "/quit")
-    {
-        std::string leaveMessage(" has quit !");
-        dispatchMessage(Message((*message.sender)->getName() + leaveMessage, message.sender));
-    }
-    else
-    {
-        dispatchMessage(Message((*message.sender)->getName() + std::string(">") + message.data, message.sender));
-    }
+   
+	this->mActionListMessage.append(" " + message.data);
+    dispatchMessage(Message(message.data, message.sender));
+  
 }
 
 void ChatRoom::getMessageAllFromClient()
@@ -140,11 +64,17 @@ bool ChatRoom::addClient(SOCKET sock)
 
             m_clients.push_back(newClient);	
 			if (m_clients.size() == 1)
-				newClient->send("Start Player White SwithTurn");
+				newClient->send("Player White Start");
 			else if (m_clients.size() == 2)
-				newClient->send("Start Player Black");
+			{
+				m_clients[0]->send("SwitchTurn");
+				newClient->send("Player Black Start");
+			}	
 			else if (m_clients.size() > 2)
-				newClient->send("Start Spectator");
+			{
+				newClient->send("Spectator Start "+ this->mActionListMessage);
+			}
+				
         }
         else
         {
@@ -164,10 +94,8 @@ void ChatRoom::dispatchMessage(const Message& message)
 {
     if (message.data.size() > 0)
     {
-        std::string buf((*message.sender)->getName());
-        buf += ">";
-        buf += message.data;
-
+        std::string buf;
+       
         for (std::vector<std::shared_ptr<ChatClient>>::iterator it = m_clients.begin(); it != m_clients.end(); ++it)
         {
             if (it != message.sender)

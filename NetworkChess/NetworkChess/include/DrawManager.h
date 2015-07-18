@@ -30,7 +30,7 @@ public:
 	void addText(string name, string text, TTF_Font* font, SDL_Color color);
 
 	void render();
-	void clear();
+	void clear(SDL_Color color);
 	void drawTexture(string nameImage, int x, int y, int w, int h);
 	void drawTexture(string nameImage, int x, int y);
 	void drawTexture(string nameObject, string nameImage, int x, int y, int w, int h);

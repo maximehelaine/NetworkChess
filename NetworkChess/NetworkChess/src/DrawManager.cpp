@@ -89,9 +89,10 @@ void DrawManager::render()
 {
 	SDL_RenderPresent(this->mRenderer); // Affichage
 }
-void DrawManager::clear()
+void DrawManager::clear(SDL_Color color)
 {
 	// Clear the entire screen to our selected color.
+	SDL_SetRenderDrawColor(this->mRenderer, color.r, color.g, color.b, 255);
 	SDL_RenderClear(this->mRenderer);
 }
 void DrawManager::drawTexture(string nameImage, int x, int y, int w, int h)
@@ -276,7 +277,7 @@ void DrawManager::drawInputText(string text, string fieldTexture , string fieldP
 void DrawManager::drawRect(SDL_Rect rect, SDL_Color color)
 {
 	// Set render color to blue ( rect will be rendered in this color )
-	SDL_SetRenderDrawColor(this->mRenderer, color.r, color.g, color.b, 255);
+	SDL_SetRenderDrawColor(this->mRenderer, color.r, color.g, color.b, color.a);
 
 	// Render rect
 	SDL_RenderFillRect(this->mRenderer, &rect);

@@ -38,8 +38,12 @@ void MessageManager::parseCommand(string command)
 	{
 		if (commands[i] == "Start")
 		{
-			GAMEMANAGER.setStart(true);
 			GAMEMANAGER.initPositionPiece(WINDOW_HEIGHT / 10, WINDOW_HEIGHT / 10, WINDOW_WIDTH / 2 - (WINDOW_HEIGHT * 80 / 100) / 2, WINDOW_HEIGHT / 2 - (WINDOW_HEIGHT * 80 / 100) / 2);
+			GAMEMANAGER.setStart(true);
+		}
+		else if (commands[i] == "Finish")
+		{
+			GAMEMANAGER.setFinish(true);
 		}
 		else if (commands[i] == "White")
 		{
@@ -49,7 +53,7 @@ void MessageManager::parseCommand(string command)
 		{
 			GAMEMANAGER.setColor(ColorClient::Black);
 		}
-		else if (commands[i] == "SwtichTurn")
+		else if (commands[i] == "SwitchTurn")
 		{
 			GAMEMANAGER.switchTurn();
 		}
@@ -61,9 +65,10 @@ void MessageManager::parseCommand(string command)
 		{
 			GAMEMANAGER.setType(TypeClient::Spectator);
 		}
-		else if (commands[i] == "Position")
+		else if (commands[i] == "Move")
 		{
-			
+			GAMEMANAGER.setPositionByName(commands[i + 1], static_cast<ColorClient>(stoi(commands[i + 2])), { stoi(commands[i + 3]), stoi(commands[i + 4]), stoi(commands[i + 5]), stoi(commands[i + 6]) });
+			GAMEMANAGER.setNeedUpdateDisplay(true);
 		}
 	}
 	
@@ -79,6 +84,10 @@ bool MessageManager::isPlayer()
 void MessageManager::setStatue(bool value)
 {
 	this->mIsPlayer = value;
+}
+void MessageManager::send(string message)
+{
+	this->mClient.send(message);
 }
 void MessageManager::close()
 {

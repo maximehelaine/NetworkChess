@@ -14,8 +14,8 @@ void drawInteractiveMenuPrincipal();
 void drawLevel();
 void drawDamier(int w, int h, int nbBoxX, int nbBoxY, int offsetX, int offsetY);
 void principalLoop();
-void menuLoop();
-void gameLoop();
+int menuLoop();
+int gameLoop();
 
 int main(int argc, char** argv)
 {
@@ -62,6 +62,12 @@ int main(int argc, char** argv)
 
 		DRAWMANAGER.addText("ClientButton", "Client v1.0", TTF_OpenFont("src/fonts/arial.ttf", 72), { 0, 0, 0 });
 		DRAWMANAGER.addText("Connexion", "Connexion", TTF_OpenFont("src/fonts/arial.ttf", 72), { 0, 0, 0 });
+		DRAWMANAGER.addText("AbandonButton", "Abandon", TTF_OpenFont("src/fonts/arial.ttf", 72), { 255, 255,255 });
+		DRAWMANAGER.addText("TurnMessage", "Your Turn", TTF_OpenFont("src/fonts/arial.ttf", 72), { 255, 255, 255 });
+		DRAWMANAGER.addText("CheckMessage", "Winter is Comming", TTF_OpenFont("src/fonts/arial.ttf", 72), { 255, 255, 255 });
+
+		GAMEMANAGER.setDamierRect({ WINDOW_WIDTH / 2 - (WINDOW_HEIGHT * 80 / 100) / 2, WINDOW_HEIGHT / 2 - (WINDOW_HEIGHT * 80 / 100) / 2, 8 * WINDOW_HEIGHT / 10, 8 * WINDOW_HEIGHT / 10 });
+
 		principalLoop();
 
 		SDL_DestroyWindow(DRAWMANAGER.getWindow());
@@ -99,6 +105,11 @@ void drawLevel()
 
 	//DrawDamier
 	drawDamier(windowsH / 10, windowsH / 10, 7, 7, windowsW / 2 - (windowsH * 80 / 100) / 2, windowsH / 2 - (windowsH * 80 / 100) / 2);
+	DRAWMANAGER.drawTexture("AbandonPos", "AbandonButton", (windowsW * 85 / 100) - 100, windowsH / 2 - 25, 200, 50);
+	if (GAMEMANAGER.isMyTurn() && GAMEMANAGER.getTypeClient() != TypeClient::Spectator)
+		DRAWMANAGER.drawTexture("TurnMessage", (windowsW * 15 / 100) - 100, windowsH / 2 - 25, 200, 50);
+	if (GAMEMANAGER.isCheck())
+		DRAWMANAGER.drawTexture("CheckMessage", (windowsW * 50 / 100) - 100, (windowsH * 5 / 100) - 25, 200, 50);
 	//SDL_Surface* pSprite = DRAWMANAGER.getSurface("EchecDamier");
 	//DRAWMANAGER.drawTexture("EchecDamier", windowsW / 2 - (windowsH * 80 / 100) / 2, windowsH / 2 - (windowsH * 80 / 100) / 2, (windowsH * 80 / 100), (windowsH * 80 / 100));
 }
@@ -122,10 +133,15 @@ void drawDamier(int w, int h, int nbBoxX, int nbBoxY, int offsetX, int offsetY)
 }
 void principalLoop()
 {
-	menuLoop();
-	gameLoop();
+	int response = 0;
+	while (response!=-1)
+	{
+		response = menuLoop();
+		if (response != -1)
+			response = gameLoop();
+	}
 }
-void menuLoop()
+int menuLoop()
 {
 	
 	drawBackGroundMenuPrincipal();
@@ -223,33 +239,92 @@ void menuLoop()
 					break;
 				case SDL_QUIT:
 					continuer = 0;
+					return -1;
 			}
 		}
 		
 	}
+	return 0;
 }
 
-void gameLoop()
+int gameLoop()
 {
 	int windowsW = SDL_GetWindowSurface(DRAWMANAGER.getWindow())->w;
 	int windowsH = SDL_GetWindowSurface(DRAWMANAGER.getWindow())->h;
-	DRAWMANAGER.clear();
+	DRAWMANAGER.clear({ 0, 0, 0, 255 });
 	drawLevel();
 	GAMEMANAGER.displayPieces();
 	DRAWMANAGER.render();
 	int continuer = 1;
 	SDL_Event event;
+	SDL_Rect mousePosition;
+	bool isShowRange = false;
+	string surfaceNameClicked;
 	while (continuer && MESSAGEMANAGER.isConnected())
 	{
 		while (SDL_PollEvent(&event)) // Nous traitons les événements de la queue
 		{
 			switch (event.type)
 			{
+			case SDL_MOUSEBUTTONUP:
+				if (GAMEMANAGER.getTypeClient() != TypeClient::Player)
+					break;
+				mousePosition = { event.button.x, event.button.y, 1, 1 };
+				surfaceNameClicked = DRAWMANAGER.getNameTextureClicked(mousePosition);
+				if (surfaceNameClicked == "AbandonPos")
+				{
+					GAMEMANAGER.setFinish(true);
+					MESSAGEMANAGER.send("Finish");
+					break;
+				}
+				if (!GAMEMANAGER.isMyTurn())
+					break;
+				DRAWMANAGER.clear({ 0, 0, 0, 255 });
+				drawLevel();
+				if (GAMEMANAGER.clickedpiece(mousePosition))
+				{
+					GAMEMANAGER.getSelectedPiece().drawRange({ 0, 255, 0, 127 });
+					isShowRange = true;
+				}
+				else if (isShowRange && GAMEMANAGER.getSelectedPiece().isClickedRange(mousePosition))
+				{
+					if (GAMEMANAGER.setPositionByName(GAMEMANAGER.getSelectedPieceName(), GAMEMANAGER.getColorClient(), GAMEMANAGER.getRectRangeSelected()))
+					{
+						MESSAGEMANAGER.send("Move " + GAMEMANAGER.getSelectedPieceName() + " " + std::to_string(static_cast<int>(GAMEMANAGER.getColorClient())) + " " + std::to_string(GAMEMANAGER.getRectRangeSelected().x) + " " + std::to_string(GAMEMANAGER.getRectRangeSelected().y) + " " + std::to_string(GAMEMANAGER.getRectRangeSelected().w) + " " + std::to_string(GAMEMANAGER.getRectRangeSelected().h) + " SwitchTurn");
+						GAMEMANAGER.switchTurn();
+					}
+						
+					isShowRange = false;
+				}
+				else
+				{
+					isShowRange = false;
+				}
+				GAMEMANAGER.displayPieces();
+				DRAWMANAGER.render();
+				break;
 			case SDL_QUIT:
 				continuer = 0;
 				MESSAGEMANAGER.close();
+				return -1;
 			}
 		}
+		if (GAMEMANAGER.needUpdateDipslay())
+		{
+			DRAWMANAGER.clear({ 0, 0, 0, 255 });
+			drawLevel();
+			GAMEMANAGER.displayPieces();
+			DRAWMANAGER.render();
+			GAMEMANAGER.setNeedUpdateDisplay(false);
+		}
+		if (GAMEMANAGER.isFinish())
+		{
+			GAMEMANAGER.clear();
+			MESSAGEMANAGER.close();
+			DRAWMANAGER.clear({ 0, 0, 0, 255 });
+			return 0;
+		}
 	} 
+	return 0;
 }
 

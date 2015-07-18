@@ -20,6 +20,7 @@ public:
 	bool isConnected();
 	bool isPlayer();
 	void setStatue(bool value);
+	void send(string message);
 	void close();
 
 private:

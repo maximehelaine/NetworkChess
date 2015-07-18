@@ -229,21 +229,12 @@ void ChatClient::receiveLoop()
 
 bool ChatClient::processCommandLine(const std::string& command)
 {
-    if (command.find("/h") != command.npos)
+    
+    if (!send(command))
     {
-        std::cout << "Liste des commandes" << std::endl
-            << "/name name (Changement de nom)" << std::endl
-            << "/w name message (Envoi un message privé à l'utiliateur name)" << std::endl
-            << "/quit (Quit le chat)" << std::endl
-            << "/list (Affiche la liste des utilisateurs connecté" << std::endl;
+        std::cerr << "Connection reset" << std::endl;
     }
-    else
-    {
-        if (!send(command))
-        {
-            std::cerr << "Connection reset" << std::endl;
-        }
-    }
+  
 
     return true;
 }

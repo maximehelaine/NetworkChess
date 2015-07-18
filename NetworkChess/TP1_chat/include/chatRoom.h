@@ -18,7 +18,8 @@ public:
     void getMessageAllFromClient();
 	void sendMessage(std::string message);
     bool addClient(SOCKET sock);
-
+private:
+	std::string mActionListMessage = "";
 protected:
     typedef std::vector<std::shared_ptr<ChatClient>> VecUser;
     VecUser m_clients;
