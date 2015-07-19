@@ -304,7 +304,8 @@ int gameLoop()
 				DRAWMANAGER.render();
 				break;
 			case SDL_QUIT:
-				continuer = 0;
+				GAMEMANAGER.clear();
+				MESSAGEMANAGER.send("Finish");
 				MESSAGEMANAGER.close();
 				return -1;
 			}

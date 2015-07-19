@@ -9,6 +9,8 @@ void ChatRoom::processMessage(const Message& message)
 {
    
 	this->mActionListMessage.append(" " + message.data);
+	if (message.data == "Finish")
+		this->mActionListMessage = "";
     dispatchMessage(Message(message.data, message.sender));
   
 }
