@@ -272,7 +272,7 @@ void DrawManager::drawText(string input, int x, int y, TTF_Font* font, SDL_Color
 void DrawManager::drawInputText(string text, string fieldTexture , string fieldPos, TTF_Font* font, SDL_Color color)
 {
 	this->drawTexture(fieldTexture, this->mRectList[fieldPos]->x, this->mRectList[fieldPos]->y, this->mRectList[fieldPos]->w, this->mRectList[fieldPos]->h);
-	this->drawText(text, this->mRectList[fieldPos]->x, this->mRectList[fieldPos]->y, TTF_OpenFont("src/fonts/arial.ttf", 24), { 0, 0, 0 });
+	this->drawText(text, this->mRectList[fieldPos]->x, this->mRectList[fieldPos]->y, font, color);
 }
 void DrawManager::drawRect(SDL_Rect rect, SDL_Color color)
 {

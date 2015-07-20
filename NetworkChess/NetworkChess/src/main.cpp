@@ -4,7 +4,7 @@
 #include <WinSock2.h>
 
 #include "DrawManager.h"
-#include "SoundManager.h"
+//#include "SoundManager.h"
 #include "MessageManager.h"
 #include "GameManager.h"
 
@@ -38,33 +38,37 @@ int main(int argc, char** argv)
 	
 	DRAWMANAGER.initWindow("Chess", WINDOW_WIDTH, WINDOW_HEIGHT);
 	DRAWMANAGER.initRenderer();
-	SOUNDMANAGER.initFMOD();
+	//SOUNDMANAGER.initFMOD();
 	
 	if (DRAWMANAGER.getWindow())
 	{
-		DRAWMANAGER.addImage("WallPaperPrincipal", "src/img/chessWallPaper.bmp");
-		//DRAWMANAGER.addImage("EchecDamier", "src/img/EchecDamier.bmp");
-		DRAWMANAGER.addImage("InputField", "src/img/inputField.bmp");
+		DRAWMANAGER.addImage("WallPaperPrincipal", "resources/img/chessWallPaper.bmp");
+		//DRAWMANAGER.addImage("EchecDamier", "resources/img/EchecDamier.bmp");
+		DRAWMANAGER.addImage("InputField", "resources/img/inputField.bmp");
+		DRAWMANAGER.addText("Pseudo", "Pseudo", TTF_OpenFont("resources/fonts/arial.ttf", 36), { 0, 0, 0 });
+		DRAWMANAGER.addText("IP", "IP", TTF_OpenFont("resources/fonts/arial.ttf", 36), { 0, 0, 0 });
+		DRAWMANAGER.addText("Port", "Port", TTF_OpenFont("resources/fonts/arial.ttf",36), { 0, 0, 0 });
 
-		DRAWMANAGER.addImage("PawnWhite", "src/img/PawnWhite.png");
-		DRAWMANAGER.addImage("RookWhite", "src/img/RookWhite.png");
-		DRAWMANAGER.addImage("KnightWhite", "src/img/KnightWhite.png");
-		DRAWMANAGER.addImage("BishopWhite", "src/img/BishopWhite.png");
-		DRAWMANAGER.addImage("QueenWhite", "src/img/QueenWhite.png");
-		DRAWMANAGER.addImage("KingWhite", "src/img/KingWhite.png");
+		DRAWMANAGER.addImage("PawnWhite", "resources/img/PawnWhite.png");
+		DRAWMANAGER.addImage("RookWhite", "resources/img/RookWhite.png");
+		DRAWMANAGER.addImage("KnightWhite", "resources/img/KnightWhite.png");
+		DRAWMANAGER.addImage("BishopWhite", "resources/img/BishopWhite.png");
+		DRAWMANAGER.addImage("QueenWhite", "resources/img/QueenWhite.png");
+		DRAWMANAGER.addImage("KingWhite", "resources/img/KingWhite.png");
 
-		DRAWMANAGER.addImage("PawnBlack", "src/img/PawnBlack.png");
-		DRAWMANAGER.addImage("RookBlack", "src/img/RookBlack.png");
-		DRAWMANAGER.addImage("KnightBlack", "src/img/KnightBlack.png");
-		DRAWMANAGER.addImage("BishopBlack", "src/img/BishopBlack.png");
-		DRAWMANAGER.addImage("QueenBlack", "src/img/QueenBlack.png");
-		DRAWMANAGER.addImage("KingBlack", "src/img/KingBlack.png");
+		DRAWMANAGER.addImage("PawnBlack", "resources/img/PawnBlack.png");
+		DRAWMANAGER.addImage("RookBlack", "resources/img/RookBlack.png");
+		DRAWMANAGER.addImage("KnightBlack", "resources/img/KnightBlack.png");
+		DRAWMANAGER.addImage("BishopBlack", "resources/img/BishopBlack.png");
+		DRAWMANAGER.addImage("QueenBlack", "resources/img/QueenBlack.png");
+		DRAWMANAGER.addImage("KingBlack", "resources/img/KingBlack.png");
 
-		DRAWMANAGER.addText("ClientButton", "Client v1.0", TTF_OpenFont("src/fonts/arial.ttf", 72), { 0, 0, 0 });
-		DRAWMANAGER.addText("Connexion", "Connexion", TTF_OpenFont("src/fonts/arial.ttf", 72), { 0, 0, 0 });
-		DRAWMANAGER.addText("AbandonButton", "Abandon", TTF_OpenFont("src/fonts/arial.ttf", 72), { 255, 255,255 });
-		DRAWMANAGER.addText("TurnMessage", "Your Turn", TTF_OpenFont("src/fonts/arial.ttf", 72), { 255, 255, 255 });
-		DRAWMANAGER.addText("CheckMessage", "Winter is Comming", TTF_OpenFont("src/fonts/arial.ttf", 72), { 255, 255, 255 });
+		DRAWMANAGER.addText("ClientButton", "Client v1.0", TTF_OpenFont("resources/fonts/arial.ttf", 72), { 0, 0, 0 });
+		DRAWMANAGER.addText("Connexion", "Connexion", TTF_OpenFont("resources/fonts/arial.ttf", 72), { 0, 0, 0 });
+		DRAWMANAGER.addText("AbandonButton", "Abandon", TTF_OpenFont("resources/fonts/arial.ttf", 72), { 255, 255,255 });
+		DRAWMANAGER.addText("TurnMessage", "Your Turn", TTF_OpenFont("resources/fonts/arial.ttf", 72), { 255, 255, 255 });
+		DRAWMANAGER.addText("CheckMessage", "Winter is Coming", TTF_OpenFont("resources/fonts/arial.ttf", 72), { 255, 255, 255 });
+		DRAWMANAGER.addText("FailedConnexion", "Failed Connexion", TTF_OpenFont("resources/fonts/arial.ttf", 24), { 255, 0, 0 });
 
 		GAMEMANAGER.setDamierRect({ WINDOW_WIDTH / 2 - (WINDOW_HEIGHT * 80 / 100) / 2, WINDOW_HEIGHT / 2 - (WINDOW_HEIGHT * 80 / 100) / 2, 8 * WINDOW_HEIGHT / 10, 8 * WINDOW_HEIGHT / 10 });
 
@@ -73,7 +77,7 @@ int main(int argc, char** argv)
 		SDL_DestroyWindow(DRAWMANAGER.getWindow());
 		DRAWMANAGER.freeImages();
 		DRAWMANAGER.freeRenderer();
-		SOUNDMANAGER.freeFMOD();
+		//SOUNDMANAGER.freeFMOD();
 	}
 	else
 	{
@@ -96,6 +100,9 @@ void drawBackGroundMenuPrincipal()
 	DRAWMANAGER.drawTexture("IpFieldPos", "InputField", (windowsW / 2) - 100, DRAWMANAGER.getRect("PseudoFieldPos")->y + 60, 200, 50);
 	DRAWMANAGER.drawTexture("PortFieldPos", "InputField", (windowsW / 2) - 100, DRAWMANAGER.getRect("IpFieldPos")->y + 60, 200, 50);
 	DRAWMANAGER.drawTexture("ConnexionPos", "Connexion", (windowsW * 80 / 100) - 100, DRAWMANAGER.getRect("PseudoFieldPos")->y + 60, 200, 50);
+	DRAWMANAGER.drawTexture("Pseudo", (windowsW * 25 / 100), (windowsH / 9) * 5 - 18);
+	DRAWMANAGER.drawTexture("IP", (windowsW * 25 / 100), DRAWMANAGER.getRect("PseudoFieldPos")->y + 60);
+	DRAWMANAGER.drawTexture("Port", (windowsW * 25 / 100), DRAWMANAGER.getRect("IpFieldPos")->y + 60);
 }
 void drawLevel()
 {
@@ -172,7 +179,15 @@ int menuLoop()
 							break;
 
 						cout << "Run Client" << endl;
-						MESSAGEMANAGER.connect(pseudoText, ipText, stoi(portText));
+						try
+						{
+							MESSAGEMANAGER.connect(pseudoText, ipText, stoi(portText));
+						}
+						catch (...)
+						{
+							DRAWMANAGER.drawTexture("FailedConnexion", (WINDOW_WIDTH * 80 / 100), (WINDOW_HEIGHT * 10 / 100));
+							DRAWMANAGER.render();
+						}
 						
 						if (MESSAGEMANAGER.isConnected())
 						{
@@ -203,17 +218,17 @@ int menuLoop()
 						if (surfaceNameClicked == "PseudoFieldPos" && pseudoText.size() != 0)
 						{
 							pseudoText.pop_back();
-							DRAWMANAGER.drawInputText(pseudoText, "InputField", "PseudoFieldPos", TTF_OpenFont("src/fonts/arial.ttf", 24), { 0, 0, 0 });
+							DRAWMANAGER.drawInputText(pseudoText, "InputField", "PseudoFieldPos", TTF_OpenFont("resources/fonts/arial.ttf", 24), { 0, 0, 0 });
 						}
 						else if (surfaceNameClicked == "IpFieldPos" && ipText.size() != 0)
 						{
 							ipText.pop_back();
-							DRAWMANAGER.drawInputText(ipText, "InputField", "IpFieldPos", TTF_OpenFont("src/fonts/arial.ttf", 24), { 0, 0, 0 });
+							DRAWMANAGER.drawInputText(ipText, "InputField", "IpFieldPos", TTF_OpenFont("resources/fonts/arial.ttf", 24), { 0, 0, 0 });
 						}
 						else if (surfaceNameClicked == "PortFieldPos" && portText.size() != 0)
 						{
 							portText.pop_back();
-							DRAWMANAGER.drawInputText(portText, "InputField", "PortFieldPos", TTF_OpenFont("src/fonts/arial.ttf", 24), { 0, 0, 0 });
+							DRAWMANAGER.drawInputText(portText, "InputField", "PortFieldPos", TTF_OpenFont("resources/fonts/arial.ttf", 24), { 0, 0, 0 });
 						}
 						DRAWMANAGER.render();
 					}
@@ -223,17 +238,17 @@ int menuLoop()
 					if (surfaceNameClicked == "PseudoFieldPos")
 					{
 						pseudoText += event.text.text;
-						DRAWMANAGER.drawInputText(pseudoText, "InputField", "PseudoFieldPos", TTF_OpenFont("src/fonts/arial.ttf", 24), { 0, 0, 0 });
+						DRAWMANAGER.drawInputText(pseudoText, "InputField", "PseudoFieldPos", TTF_OpenFont("resources/fonts/arial.ttf", 24), { 0, 0, 0 });
 					}
 					else if (surfaceNameClicked == "IpFieldPos")
 					{
 						ipText += event.text.text;
-						DRAWMANAGER.drawInputText(ipText, "InputField", "IpFieldPos", TTF_OpenFont("src/fonts/arial.ttf", 24), { 0, 0, 0 });
+						DRAWMANAGER.drawInputText(ipText, "InputField", "IpFieldPos", TTF_OpenFont("resources/fonts/arial.ttf", 24), { 0, 0, 0 });
 					}
 					else if (surfaceNameClicked == "PortFieldPos")
 					{
 						portText += event.text.text;
-						DRAWMANAGER.drawInputText(portText, "InputField", "PortFieldPos", TTF_OpenFont("src/fonts/arial.ttf", 24), { 0, 0, 0 });
+						DRAWMANAGER.drawInputText(portText, "InputField", "PortFieldPos", TTF_OpenFont("resources/fonts/arial.ttf", 24), { 0, 0, 0 });
 					}
 					DRAWMANAGER.render();
 					break;
@@ -274,7 +289,8 @@ int gameLoop()
 				if (surfaceNameClicked == "AbandonPos")
 				{
 					GAMEMANAGER.setFinish(true);
-					MESSAGEMANAGER.send("Finish");
+					if (GAMEMANAGER.getTypeClient() == TypeClient::Player)
+						MESSAGEMANAGER.send("Finish");
 					break;
 				}
 				if (!GAMEMANAGER.isMyTurn())
@@ -303,9 +319,10 @@ int gameLoop()
 				GAMEMANAGER.displayPieces();
 				DRAWMANAGER.render();
 				break;
-			case SDL_QUIT:
+			case SDL_QUIT:	
+				if (GAMEMANAGER.getTypeClient() == TypeClient::Player)
+					MESSAGEMANAGER.send("Finish");
 				GAMEMANAGER.clear();
-				MESSAGEMANAGER.send("Finish");
 				MESSAGEMANAGER.close();
 				return -1;
 			}

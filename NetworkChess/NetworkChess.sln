@@ -5,7 +5,7 @@ VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetworkChess", "NetworkChess\NetworkChess.vcxproj", "{6FFA6396-A54E-4FC7-AF61-968D05C6370F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TP1_chat", "TP1_chat\TP1_chat.vcxproj", "{80CE33F3-3D36-45C4-A72E-DABAF8B287CD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Server", "Server\Server.vcxproj", "{80CE33F3-3D36-45C4-A72E-DABAF8B287CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -38,10 +38,10 @@ void Piece::initRange()
 					this->mRange.pop_back();
 
 			statue = this->addRangeRect({ this->mPosition.x - this->mWidth, this->mPosition.y - this->mHeight, this->mWidth, this->mHeight }, true);
-			if ((statue) != (RangeStatue::InEnnmyPiece) && (statue) != (RangeStatue::Out))
+			if ((statue) != (RangeStatue::InEnnmyPiece) && (statue) != (RangeStatue::Out) && (statue) != (RangeStatue::InPiece))
 				this->mRange.pop_back();
 			statue = this->addRangeRect({ this->mPosition.x + this->mWidth, this->mPosition.y - this->mHeight, this->mWidth, this->mHeight }, true);
-			if ((statue) != (RangeStatue::InEnnmyPiece) && (statue) != (RangeStatue::Out))
+			if ((statue) != (RangeStatue::InEnnmyPiece) && (statue) != (RangeStatue::Out) && (statue) != (RangeStatue::InPiece))
 				this->mRange.pop_back();
 		}
 		else if (this->mColor == ColorPiece::Black)
@@ -54,9 +54,12 @@ void Piece::initRange()
 			if (!this->hasMoved() && !stopRange)
 				if ((this->addRangeRect({ this->mPosition.x, this->mPosition.y + 2 * this->mHeight, this->mWidth, this->mHeight }, true)) == (RangeStatue::InEnnmyPiece))
 					this->mRange.pop_back();
-			if ((this->addRangeRect({ this->mPosition.x - this->mWidth, this->mPosition.y + this->mHeight, this->mWidth, this->mHeight }, true)) != (RangeStatue::InEnnmyPiece))
+
+			statue = this->addRangeRect({ this->mPosition.x - this->mWidth, this->mPosition.y + this->mHeight, this->mWidth, this->mHeight }, true);
+			if ((statue) != (RangeStatue::InEnnmyPiece) && (statue) != (RangeStatue::Out) && (statue) != (RangeStatue::InPiece))
 				this->mRange.pop_back();
-			if ((this->addRangeRect({ this->mPosition.x + this->mWidth, this->mPosition.y + this->mHeight, this->mWidth, this->mHeight }, true)) != (RangeStatue::InEnnmyPiece))
+			statue = this->addRangeRect({ this->mPosition.x + this->mWidth, this->mPosition.y + this->mHeight, this->mWidth, this->mHeight }, true);
+			if ((statue) != (RangeStatue::InEnnmyPiece) && (statue) != (RangeStatue::Out) && (statue) != (RangeStatue::InPiece))
 				this->mRange.pop_back();
 		}
 		

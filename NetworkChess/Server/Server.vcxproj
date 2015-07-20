@@ -17,7 +17,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{80CE33F3-3D36-45C4-A72E-DABAF8B287CD}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>TP1_chat</RootNamespace>
+    <RootNamespace>Server</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
